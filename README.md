@@ -1,6 +1,6 @@
-# SAF CAF classification performance
+## This is a copy of the repo made by @bobleesj
+## Original repo: https://github.com/bobleesj/SAF-CAF-performance
 
-This repository contains model performance on crystal structure classification for binary compounds, derived from 1,400 .cif files using features generated with SAF and CAF.
 
 ## How to reproduce
 
@@ -49,27 +49,13 @@ Processing outputs/CBFV/oliynyk.csv with 308 features (7/7).
 imac@imacs-iMac digitial-discovery % 
 ```
 
-Check the `outputs` folder for ML reports, plots, etc.
+Check the `features_results` folder for ML reports, plots, etc.
 
-For Figures 8 and 9, run:
-`python figure_8_case_study.py` and
-`python figure_9_case_study.py`
-
-## Result
-
-Our SAF+CAF features does a great job with classifying crystal structuree for intermetallic binary compouds. 
-
-This a PLS-DA Component N=2 result for crystal structure that you can find under `outputs/SAF_CAF/PLS_DA_plot` 
-
-![](img/SAF_CAF_binary_features_n=2.png)
-
-- Compositional features were created using [CAF](https://github.com/bobleesj/composition-analyzer-featurizer). Ex) `outputs/CAF/features_binary.csv`
-- Structural features were created using [SAF](https://github.com/bobleesj/structure-analyzer-featurizer) Ex) `outputs/SAF/binary_features.csv`
 
 ## To customize for your data
 
-1. Place a `features.csv` file in the `data` folder. It should have a "Structure" column, from which we'll extract all "y" values.
-2. Place a CSV file with features in a subdirectory within `outputs`. Example: `outputs/SAF_CAF/binary_features.csv`
+1. Place a file with class information in the `data` folder. It should have a "Structure" column, from which we'll extract all "y" values.
+2. Place a CSV file with features in a subdirectory within `features_results`. Example: `features_results/SAF_CAF/binary_features.csv`
 
 ## To format the code
 
