@@ -12,7 +12,7 @@ def plot_two_component(X, y, feature_file_path):
     y_encoded = encoder.fit_transform(y)
 
     # Load the dataset into PLS
-    pls = PLSRegression(n_components=2)
+    pls = PLSRegression(n_components=2, scale=False)
     # fit_transform returns a tuple (X_scores, Y_scores)
     X_pls = pls.fit_transform(X, y_encoded)[0]
 
@@ -53,7 +53,7 @@ def plot_two_component(X, y, feature_file_path):
                 xi,
                 yi,
                 color=colors[i],
-                s=100,
+                s=50,
                 edgecolors="k",
                 label=encoder.inverse_transform([label])[0],
             )

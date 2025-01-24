@@ -19,7 +19,7 @@ prompt.print_label_mapping(encoder)
 
 script_path = os.path.abspath(__file__)
 script_dir_path = os.path.dirname(script_path)
-output_dir_path = os.path.join(script_dir_path, "features")
+output_dir_path = os.path.join(script_dir_path, "features_results")
 
 # Find all .csv files in folders
 csv_file_paths = folder.find_csv_files(output_dir_path)
@@ -28,7 +28,7 @@ for i, csv_file_path in enumerate(csv_file_paths, start=1):
     start_time = time.perf_counter()
 
     # Load the dataset
-    X_df, X, columns = preprocess.prepare_standarlize_X_block_(csv_file_path)
+    X_df, X, columns, scaler_standard, scaler_minmax = preprocess.prepare_standarlize_X_block_(csv_file_path)
     print(
         f"\nProcessing {csv_file_path} with {X.shape[1]} features ({i}/{len(csv_file_paths)})."
     )

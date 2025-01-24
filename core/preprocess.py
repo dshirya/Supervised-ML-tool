@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
-
 def clean_dataframe(df):
     """
     Cleans the DataFrame by replacing 'N/S' with NA and dropping columns with any missing values.
@@ -23,7 +22,6 @@ def clean_dataframe(df):
     removed_col_count = initial_cols - df.shape[1]
 
     return df, removed_col_count
-
 
 def standardize_data(X, fit_scaler=True, scaler_standard=None, scaler_minmax=None):
     """
@@ -53,7 +51,6 @@ def standardize_data(X, fit_scaler=True, scaler_standard=None, scaler_minmax=Non
 
     return X_normalized, scaler_standard, scaler_minmax
 
-
 def drop_columns(df):
     """
     Drops columns from a DataFrame if they exist.
@@ -74,16 +71,68 @@ def drop_columns(df):
 
     return df
 
-
 def prepare_standarlize_X_block_(csv_file_path):
+    """
+    Reads the data, cleans the DataFrame, removes specific columns, and normalizes the data by default.
+    Returns scalers for use with validation data.
+    """
     df = pd.read_csv(csv_file_path)
+
+    # Check the shape of the dataset
+    print(f"Loaded data shape: {df.shape}")
+
+    # Drop unnecessary columns
     X_df = drop_columns(df)
-    df, removed_col_count = clean_dataframe(df)
-    print("Removed", removed_col_count, "columns with N/S or non values.")
+    print(f"Data shape after dropping columns: {X_df.shape}")
 
-    # XBBoost can't read [pm]
-    X_df.columns = X_df.columns.str.replace(r"\[pm\]", "", regex=True)
+    # Clean the DataFrame
+    X_df, removed_col_count = clean_dataframe(X_df)
+    print(f"Removed {removed_col_count} columns with invalid values.")
+    print(f"Data shape after cleaning: {X_df.shape}")
 
-    X = standardize_data(X_df)
-    columns = df.columns.tolist()
-    return X_df, X, columns
+    # Normalize the data and retrieve scalers
+    X, scaler_standard, scaler_minmax = standardize_data(X_df)
+    print(f"Shape of normalized data: {X.shape}")
+
+    # Get the list of column names
+    columns = X_df.columns.tolist()
+
+    return X_df, X, columns, scaler_standard, scaler_minmax
+
+def preprocess_validation_data(csv_file_path, scaler_standard, scaler_minmax):
+    """
+    Preprocesses validation data using the same scalers as the training data.
+    
+    Parameters:
+        csv_file_path: Path to the validation dataset.
+        scaler_standard: Fitted StandardScaler from training data.
+        scaler_minmax: Fitted MinMaxScaler from training data.
+    
+    Returns:
+        X_df: Cleaned and ordered validation DataFrame.
+        X: Normalized validation feature matrix.
+    """
+    df = pd.read_csv(csv_file_path)
+
+    # Drop unnecessary columns
+    X_df = drop_columns(df)
+    print(f"Validation data shape after dropping columns: {X_df.shape}")
+
+    # Clean the DataFrame
+    X_df, removed_col_count = clean_dataframe(X_df)
+    print(f"Removed {removed_col_count} columns with invalid values in validation data.")
+    print(f"Validation data shape after cleaning: {X_df.shape}")
+
+    # Ensure validation columns match training columns
+    training_columns = scaler_standard.feature_names_in_  # Retrieve training feature names
+    if list(X_df.columns) != list(training_columns):
+        print("Reordering validation columns to match training data...")
+        X_df = X_df[training_columns]
+
+    # Normalize validation data using the provided scalers
+    X, _, _ = standardize_data(
+        X_df, fit_scaler=False, scaler_standard=scaler_standard, scaler_minmax=scaler_minmax
+    )
+    print(f"Shape of normalized validation data: {X.shape}")
+
+    return X_df, X
