@@ -7,7 +7,6 @@ from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    confusion_matrix,
 )
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import LabelEncoder
@@ -41,10 +40,7 @@ def find_best_n_dim(X, y, csv_file_path, MAX_N_COMPONENTS=10):
 
     # Save the DataFrame to a CSV file
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA",
-        csv_file_path,
-        suffix="n_analysis",
-        ext="csv",
+        "PLS_DA", csv_file_path, suffix="n_analysis", ext="csv"
     )
     pd.DataFrame(results).to_csv(output_path, index=False)
     return best_n_components
@@ -80,10 +76,7 @@ def save_feature_importance(
 
     # Generate output path and save the dataframe to CSV
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA",
-        csv_file_path,
-        "feature_importance",
-        "csv",
+        "PLS_DA", csv_file_path, suffix="feature_importance", ext="csv"
     )
     df.to_csv(output_path)
 
@@ -129,3 +122,42 @@ def generate_classification_report(X_scaled, y, pls):
         )
 
     return class_report
+
+
+
+def validate_PLS_DA_model(pls, X_val, csv_file_path, validation_csv_file):
+    """
+    Validates the PLS-DA model on a given validation set.
+    
+    Parameters:
+        pls: Trained PLSRegression model.
+        X_val: Validation feature matrix.
+        csv_file_path: Path of the training data (for output organization).
+        validation_csv_file: Path of the validation data.
+
+    Returns:
+        y_pred_validation: Predicted classes for the validation set.
+    """
+    # Predict class probabilities for the validation set
+    y_scores_validation = pls.predict(X_val)
+
+    # Convert continuous predictions to nearest class labels
+    y_pred_validation = np.rint(y_scores_validation).astype(int)
+
+    # Clip predictions to valid range of classes
+    y_pred_validation = np.clip(y_pred_validation, 0, 9)  # Adjust range if needed
+
+    # Save predictions to a CSV file
+    output_path = folder.create_folder_get_output_path(
+        "PLS_DA", validation_csv_file, suffix="validation_predictions", ext="csv"
+    )  
+    validation_results = pd.DataFrame(
+        {
+            "Validation Sample": np.arange(1, len(X_val) + 1),
+            "Predicted Class": y_pred_validation.flatten(),  # Ensure proper formatting
+        }
+    )
+    validation_results.to_csv(output_path, index=False)
+
+    #print(f"Validation predictions saved to {output_path}")
+    return y_pred_validation

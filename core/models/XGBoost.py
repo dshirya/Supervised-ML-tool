@@ -72,3 +72,62 @@ def plot_XGBoost_feature_importance(X_df, y_encoded, csv_file_path):
     # plt.show()
 
     plt.close()
+
+def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file):
+    """
+    Validates the XGBoost model on a validation dataset and includes predicted probabilities for each class.
+
+    Parameters:
+        X_train: Training feature matrix.
+        y_train: Training target labels.
+        X_val: Validation feature matrix.
+        csv_file_path: Path of the training data (for output organization).
+        validation_csv_file: Path of the validation data.
+
+    Returns:
+        y_pred_validation: Predicted classes for the validation set.
+        probabilities: Predicted probabilities for each class.
+    """
+    # Initialize the Label Encoder and encode the training labels
+    encoder = LabelEncoder()
+    y_train_encoded = encoder.fit_transform(y_train)
+
+    # Initialize the XGBoost Classifier
+    model = XGBClassifier(eval_metric="mlogloss", random_state=19)
+
+    # Fit the model to the training data
+    model.fit(X_train, y_train_encoded)
+
+    # Predict probabilities for the validation set
+    probabilities = model.predict_proba(X_val)
+
+    # Predicted class labels
+    y_pred_encoded = probabilities.argmax(axis=1)
+    y_pred_validation = encoder.inverse_transform(y_pred_encoded)
+
+    # Dynamically determine the number of classes from probabilities
+    n_classes = probabilities.shape[1]
+
+    # Prepare the DataFrame for output
+    validation_results = pd.DataFrame(
+        {
+            "Validation Sample": range(1, len(X_val) + 1),
+            "Predicted Class": y_pred_validation,
+        }
+    )
+
+    # Add probability columns for each class
+    for i in range(n_classes):
+        validation_results[f"Class_{i}_Probability"] = probabilities[:, i]
+
+    # Save predictions and probabilities to a CSV file
+    output_path = folder.create_folder_get_output_path(
+        "XGBoost",
+        validation_csv_file,
+        suffix="validation_predictions_with_probabilities",
+        ext="csv",
+    )
+    validation_results.to_csv(output_path, index=False)
+
+    #print(f"Validation predictions with probabilities saved to {output_path}")
+    return y_pred_validation, probabilities

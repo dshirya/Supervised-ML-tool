@@ -26,18 +26,32 @@ def get_file_name(file_path):
     return file_path.split("/")[-1].split(".")[0]
 
 
-def create_folder_get_output_path(
-    model_name, csv_file_path, suffix="report", ext="csv"
-):
-    # Featurizer method directory CAF, SAF, CBFV, etc.
-    featurizer_dir_path = dirname(csv_file_path)
+def create_folder_get_output_path(model_name, csv_file_path, suffix="report", ext="csv"):
+    """
+    Creates a structured folder for storing model outputs in a separate 'outputs' directory.
 
-    # Ex) binary_features
-    feature_file_name = folder.get_file_name(csv_file_path)
+    Parameters:
+        model_name (str): The name of the model (e.g., "PLS_DA", "SVM").
+        csv_file_path (str): The path to the input CSV file.
+        suffix (str): The suffix to append to the output file name (default: "report").
+        ext (str): The file extension for the output file (default: "csv").
 
-    # Create the output directory
-    output_dir = join(featurizer_dir_path, model_name, feature_file_name)
-    makedirs(output_dir, exist_ok=True)
-    output_path = join(output_dir, feature_file_name + f"_{suffix}.{ext}")
+    Returns:
+        str: The full path to the output file.
+    """
 
-    return output_path
+    # Define the base output directory
+    base_output_dir = "outputs"
+
+    # Extract the input file name without extension
+    file_name = folder.get_file_name(csv_file_path)
+
+    # Create a structured output directory
+    output_dir = os.path.join(base_output_dir, model_name, file_name)
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Construct the full output file path
+    output_file_name = f"{file_name}_{suffix}.{ext}"
+    output_file_path = os.path.join(output_dir, output_file_name)
+
+    return output_file_path
