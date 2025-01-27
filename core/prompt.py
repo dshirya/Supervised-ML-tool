@@ -8,4 +8,4 @@ def print_label_mapping(encoder):
 
     # Print each label and its encoded value with proper spacing
     for label, encoded in label_mapping.items():
-        print(f"{label.ljust(max_label_length + 5)}| {encoded}")
+        print(f"{label.ljust(max_label_length + 5)}| {encoded+1}")

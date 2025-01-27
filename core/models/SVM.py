@@ -44,8 +44,11 @@ def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, vali
     # Predict probabilities for the validation set
     probabilities = model.predict_proba(X_val)
 
-    # Predicted class labels
+    # Predicted class labels (0-based)
     y_pred = probabilities.argmax(axis=1)
+
+    # Shift the predicted class labels to start from 1
+    y_pred = y_pred + 1
 
     # Dynamically determine the number of classes from probabilities
     n_classes = probabilities.shape[1]
@@ -53,14 +56,14 @@ def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, vali
     # Prepare the DataFrame for output
     validation_results = pd.DataFrame(
         {
-            "Validation Sample": range(1, len(X_val) + 1),
-            "Predicted Class": y_pred,
+            "Validation Sample": range(1, len(X_val) + 1),  # Validation sample numbers start from 1
+            "Predicted Class": y_pred,  # Predicted class labels starting from 1
         }
     )
 
-    # Add probability columns for each class
+    # Add probability columns for each class (shift column names to start from 1)
     for i in range(n_classes):
-        validation_results[f"Class_{i}_Probability"] = probabilities[:, i]
+        validation_results[f"Class_{i + 1}_Probability"] = probabilities[:, i]
 
     # Save predictions and probabilities to a CSV file
     output_path = folder.create_folder_get_output_path(

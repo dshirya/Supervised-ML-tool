@@ -62,7 +62,7 @@ for i, csv_file_path in enumerate(csv_file_paths, start=1):
     )
     # validation
     y_pred_val = PLS_DA.validate_PLS_DA_model(
-        best_pls, X_val, csv_file_path, validation_csv_file
+        best_pls, X, y, X_val, csv_file_path, validation_csv_file
     )
 
     print("(4/4) Running XGBoost model...")

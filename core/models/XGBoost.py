@@ -11,7 +11,7 @@ from core import folder
 def run_XGBoost(X_df, y):
     # Initialize the Label Encoder and encode the labels
     encoder = LabelEncoder()
-    y_encoded = encoder.fit_transform(y)
+    y_encoded = encoder.fit_transform(y)  # Do not shift labels here
 
     # Initialize Stratified K-Fold cross-validator
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=19)
@@ -22,13 +22,14 @@ def run_XGBoost(X_df, y):
     # Cross-validate and get predictions for each fold
     y_pred = cross_val_predict(model, X_df, y_encoded, cv=skf)
 
-    # Decode predicted labels back to original
+    # Decode predicted labels back to original (shifted for reporting purposes)
     y_pred_decoded = encoder.inverse_transform(y_pred)
 
     # Evaluate the model
-    class_report = classification_report(y, y_pred_decoded, digits=3, output_dict=True)
+    class_report = classification_report(
+        y, y_pred_decoded, digits=3, output_dict=True, labels=encoder.classes_
+    )
     return class_report
-
 
 def plot_XGBoost_feature_importance(X_df, y_encoded, csv_file_path):
     model = XGBClassifier(eval_metric="mlogloss")
@@ -90,7 +91,7 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
     """
     # Initialize the Label Encoder and encode the training labels
     encoder = LabelEncoder()
-    y_train_encoded = encoder.fit_transform(y_train)
+    y_train_encoded = encoder.fit_transform(y_train)  # Keep labels starting from 0 for XGBoost
 
     # Initialize the XGBoost Classifier
     model = XGBClassifier(eval_metric="mlogloss", random_state=19)
@@ -101,9 +102,11 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
     # Predict probabilities for the validation set
     probabilities = model.predict_proba(X_val)
 
-    # Predicted class labels
+    # Predicted class labels (0-based)
     y_pred_encoded = probabilities.argmax(axis=1)
-    y_pred_validation = encoder.inverse_transform(y_pred_encoded)
+
+    # Shift the predicted class labels to start from 1
+    y_pred_validation = y_pred_encoded + 1
 
     # Dynamically determine the number of classes from probabilities
     n_classes = probabilities.shape[1]
@@ -112,13 +115,13 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
     validation_results = pd.DataFrame(
         {
             "Validation Sample": range(1, len(X_val) + 1),
-            "Predicted Class": y_pred_validation,
+            "Predicted Class": y_pred_validation,  # Predicted class as a number starting from 1
         }
     )
 
-    # Add probability columns for each class
+    # Add probability columns for each class (shift class indices to start from 1)
     for i in range(n_classes):
-        validation_results[f"Class_{i}_Probability"] = probabilities[:, i]
+        validation_results[f"Class_{i + 1}_Probability"] = probabilities[:, i]
 
     # Save predictions and probabilities to a CSV file
     output_path = folder.create_folder_get_output_path(
@@ -129,5 +132,4 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
     )
     validation_results.to_csv(output_path, index=False)
 
-    #print(f"Validation predictions with probabilities saved to {output_path}")
     return y_pred_validation, probabilities

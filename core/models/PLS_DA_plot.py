@@ -56,14 +56,14 @@ def plot_two_component(X, y, feature_file_path):
                 color=colors[i],
                 s=50,
                 edgecolors="k",
-                label=encoder.inverse_transform([label])[0],
+                label=format_formula_to_latex(encoder.inverse_transform([label])[0]),
             )
 
         plt.xlabel(f"LV 1 ({(explained_variance_X[0] * 100):.2f} %)")
         plt.ylabel(f"LV 2 ({(explained_variance_X[1] * 100):.2f} %)")
-        plt.legend(loc="lower left", fontsize=8)
+        plt.legend(loc="lower left", fontsize=8, title_fontsize=9)
         # plt.title(f"PLS Cross-Decomposition")
-        plt.savefig(plot_path, dpi=500)  # Save the plot as a PNG file
+        plt.savefig(plot_path, dpi=600)  # Save the plot as a PNG file
         plt.close()
         # plt.show()
 
@@ -112,7 +112,7 @@ def plot_two_component_with_validation(X, y, X_val, feature_file_path):
                 color=colors[i],
                 s=50,
                 edgecolors="k",
-                label=encoder.inverse_transform([label])[0],
+                label=format_formula_to_latex(encoder.inverse_transform([label])[0]),
             )
 
         # Plot validation data
@@ -127,12 +127,24 @@ def plot_two_component_with_validation(X, y, X_val, feature_file_path):
             label="Validation Data",
         )
 
-        # Add labels and legend
         plt.xlabel(f"LV 1 ({(explained_variance_X[0] * 100):.2f} %)")
         plt.ylabel(f"LV 2 ({(explained_variance_X[1] * 100):.2f} %)")
-        plt.legend(loc="lower left", fontsize=8)
+        plt.legend(loc="lower left", fontsize=8, title_fontsize=9)
         plt.title(f"PLS-DA Scatterplot: Training and Validation Data")  # noqa: F541
-        plt.savefig(plot_path, dpi=300)  # Save the plot as a PNG file
+        plt.savefig(plot_path, dpi=600)  # Save the plot as a PNG file
         plt.close()
 
     #print(f"Plot saved to {plot_path}")
+
+def format_formula_to_latex(formula):
+    """
+    Convert a chemical formula string into LaTeX format with subscripts.
+    E.g., "H2O" -> "H$_2$O"
+    """
+    formatted = ""
+    for char in formula:
+        if char.isdigit():  # Convert digits to subscript
+            formatted += f"$_{char}$"
+        else:
+            formatted += char
+    return formatted
