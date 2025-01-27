@@ -47,7 +47,7 @@ for i, csv_file_path in enumerate(csv_file_paths, start=1):
     )
 
     print("(2/4) Running PLS_DA n=2...")
-    PLS_DA_plot.plot_two_component(X, y, csv_file_path)
+    PLS_DA_plot.plot_two_component(X, y, csv_file_path) 
     PLS_DA_plot.plot_two_component_with_validation(X, y, X_val, csv_file_path)
 
     print("(3/4) Running PLS_DA model with the best n...")
