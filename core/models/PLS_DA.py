@@ -10,7 +10,6 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
 from scipy.special import softmax
 
 from core import folder
@@ -141,31 +140,38 @@ def validate_PLS_DA_model(pls, X, y, X_val, csv_file_path, validation_csv_file):
         validation_results: DataFrame with predicted classes and probabilities for the validation set.
     """
 
-    # One-hot encode the target variable for multi-class representation
-    encoder = OneHotEncoder(sparse_output=False)  # Updated for modern syntax
-    y_encoded = encoder.fit_transform(y.to_numpy().reshape(-1, 1)) + 1
+    # Encode string labels to integers using LabelEncoder
+    label_encoder = LabelEncoder()
+    y_encoded = label_encoder.fit_transform(y)
 
-    # Fit the PLS model using one-hot encoded targets
-    pls.fit(X, y_encoded)
+    # Fit the PLS model using encoded targets
+    pls.fit(X, pd.get_dummies(y_encoded))
 
     # Predict continuous scores for the validation set
     y_scores_validation = pls.predict(X_val)
 
-    # Apply softmax to mimic predict_proba
+    # Apply softmax to normalize predictions to probabilities
     probabilities = softmax(y_scores_validation, axis=1)
 
-    # Convert probabilities to predicted class labels
-    y_pred_validation = np.argmax(probabilities, axis=1)
+    # Convert probabilities to predicted class indices
+    y_pred_validation_encoded = np.argmax(probabilities, axis=1)
 
-    # Save predictions and probabilities to a CSV file
+    # Shift class indices to start from 1
+    y_pred_validation = y_pred_validation_encoded + 1
+
+    # Use integer-based class indices for column names
+    class_indices = range(len(label_encoder.classes_))
+    column_names = [f"Class_{i + 1}" for i in class_indices]
+
+    # Save predictions and probabilities to a DataFrame
+    validation_results = pd.DataFrame(probabilities, columns=column_names)
+    validation_results.insert(0, "Sample", np.arange(1, len(X_val) + 1))
+    validation_results["Predicted Class"] = y_pred_validation
+
+    # Save the results to a CSV file
     output_path = folder.create_folder_get_output_path(
         "PLS_DA", validation_csv_file, suffix="validation_predictions", ext="csv"
     )
-    validation_results = pd.DataFrame(
-        probabilities, columns=[f"Class_{cls}" for cls in encoder.categories_[0]]
-    )
-    validation_results.insert(0, "Sample", np.arange(1, len(X_val) + 1))
-    validation_results["Predicted Class"] = y_pred_validation
     validation_results.to_csv(output_path, index=False)
 
     return validation_results
