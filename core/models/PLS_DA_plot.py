@@ -1,15 +1,39 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.cross_decomposition import PLSRegression
-from sklearn.preprocessing import LabelEncoder
 
 from core import folder
 
+# Define the class-to-integer mapping
+class_mapping = {
+    "Cu3Au": 1,
+    "Cr3Si": 2,
+    "PuNi3": 3,
+    "Fe3C": 4,
+    "Mg3Cd": 5,
+    "TiAl3": 6,
+}
+
+def encode_classes(y, class_mapping):
+    """Encodes the class labels using the provided mapping."""
+    return np.array([class_mapping[label] for label in y])
+
+def format_formula_to_latex(formula):
+    """
+    Convert a chemical formula string into LaTeX format with subscripts.
+    E.g., "H2O" -> "H$_2$O"
+    """
+    formatted = ""
+    for char in formula:
+        if char.isdigit():  # Convert digits to subscript
+            formatted += f"$_{char}$"
+        else:
+            formatted += char
+    return formatted
 
 def plot_two_component(X, y, feature_file_path):
-    # Convert string labels to integers
-    encoder = LabelEncoder()
-    y_encoded = encoder.fit_transform(y)
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
 
     # Load the dataset into PLS
     pls = PLSRegression(n_components=2, scale=False)
@@ -56,7 +80,7 @@ def plot_two_component(X, y, feature_file_path):
                 color=colors[i],
                 s=50,
                 edgecolors="k",
-                label=format_formula_to_latex(encoder.inverse_transform([label])[0]),
+                label=format_formula_to_latex(list(class_mapping.keys())[list(class_mapping.values()).index(label)]),
             )
 
         plt.xlabel(f"LV 1 ({(explained_variance_X[0] * 100):.2f} %)")
@@ -67,11 +91,9 @@ def plot_two_component(X, y, feature_file_path):
         plt.close()
         # plt.show()
 
-
 def plot_two_component_with_validation(X, y, X_val, feature_file_path):
-    # Convert string labels to integers
-    encoder = LabelEncoder()
-    y_encoded = encoder.fit_transform(y)
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
 
     # Train the PLS model with 2 components
     pls = PLSRegression(n_components=2, scale=False)
@@ -112,7 +134,7 @@ def plot_two_component_with_validation(X, y, X_val, feature_file_path):
                 color=colors[i],
                 s=50,
                 edgecolors="k",
-                label=format_formula_to_latex(encoder.inverse_transform([label])[0]),
+                label=format_formula_to_latex(list(class_mapping.keys())[list(class_mapping.values()).index(label)]),
             )
 
         # Plot validation data
@@ -133,18 +155,3 @@ def plot_two_component_with_validation(X, y, X_val, feature_file_path):
         plt.title(f"PLS-DA Scatterplot: Training and Validation Data")  # noqa: F541
         plt.savefig(plot_path, dpi=600)  # Save the plot as a PNG file
         plt.close()
-
-    #print(f"Plot saved to {plot_path}")
-
-def format_formula_to_latex(formula):
-    """
-    Convert a chemical formula string into LaTeX format with subscripts.
-    E.g., "H2O" -> "H$_2$O"
-    """
-    formatted = ""
-    for char in formula:
-        if char.isdigit():  # Convert digits to subscript
-            formatted += f"$_{char}$"
-        else:
-            formatted += char
-    return formatted

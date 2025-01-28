@@ -10,10 +10,27 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import LabelEncoder
-from scipy.special import softmax
 
 from core import folder
 
+# Define the class-to-integer mapping
+class_mapping = {
+    "Cu3Au": 1,
+    "Cr3Si": 2,
+    "PuNi3": 3,
+    "Fe3C": 4,
+    "Mg3Cd": 5,
+    "TiAl3": 6,
+}
+
+def encode_classes(y, class_mapping):
+    """Encodes the class labels using the provided mapping."""
+    return np.array([class_mapping[label] for label in y])
+
+def decode_classes(y_encoded, class_mapping):
+    """Decodes the integer class labels back to their string representation."""
+    reverse_mapping = {v: k for k, v in class_mapping.items()}
+    return np.array([reverse_mapping[label] for label in y_encoded])
 
 def find_best_n_dim(X, y, csv_file_path, MAX_N_COMPONENTS=10):
     best_accuracy = 0
@@ -126,51 +143,48 @@ def generate_classification_report(X_scaled, y, pls):
 
 def validate_PLS_DA_model(pls, X, y, X_val, csv_file_path, validation_csv_file):
     """
-    Validates the PLS-DA model on a given validation set and provides raw predicted probabilities.
+    Validates the PLS-DA model using one-vs-rest probabilities for classification.
 
     Parameters:
         pls: Trained PLSRegression model.
         X: Training feature matrix.
         y: Training target array.
         X_val: Validation feature matrix.
-        csv_file_path: Path of the training data (for output organization).
+        csv_file_path: Path of the training data.
         validation_csv_file: Path of the validation data.
 
     Returns:
-        validation_results: DataFrame with predicted classes and probabilities for the validation set.
+        validation_results: DataFrame with predicted class probabilities.
     """
 
-    # Encode string labels to integers using LabelEncoder
-    label_encoder = LabelEncoder()
-    y_encoded = label_encoder.fit_transform(y)
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
 
-    # Fit the PLS model using encoded targets
-    pls.fit(X, pd.get_dummies(y_encoded))
+    # Convert y_encoded to one-hot encoding for regression
+    y_one_hot = pd.get_dummies(y_encoded)
 
-    # Predict continuous scores for the validation set
+    # Train the PLS model
+    pls.fit(X, y_one_hot)
+
+    # Get raw predictions for the validation set
     y_scores_validation = pls.predict(X_val)
 
-    # Apply softmax to normalize predictions to probabilities
-    probabilities = softmax(y_scores_validation, axis=1)
+    # Ensure all predictions are positive and normalize them to probabilities (one-vs-rest)
+    probabilities = np.maximum(y_scores_validation, 0)
+    probabilities = probabilities / probabilities.sum(axis=1, keepdims=True)
 
-    # Convert probabilities to predicted class indices
-    y_pred_validation_encoded = np.argmax(probabilities, axis=1)
+    # Assign predicted class based on the highest probability
+    y_pred_validation_encoded = np.argmax(probabilities, axis=1) + 1  # Classes start from 1
 
-    # Shift class indices to start from 1
-    y_pred_validation = y_pred_validation_encoded + 1
-
-    # Use integer-based class indices for column names
-    class_indices = range(len(label_encoder.classes_))
-    column_names = [f"Class_{i + 1}" for i in class_indices]
-
-    # Save predictions and probabilities to a DataFrame
+    # Save results in a DataFrame
+    column_names = [f"Class_{i}" for i in range(1, len(class_mapping) + 1)]
     validation_results = pd.DataFrame(probabilities, columns=column_names)
     validation_results.insert(0, "Sample", np.arange(1, len(X_val) + 1))
-    validation_results["Predicted Class"] = y_pred_validation
+    validation_results["Predicted Class"] = y_pred_validation_encoded
 
-    # Save the results to a CSV file
+    # Save results to a CSV file
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA", validation_csv_file, suffix="validation_predictions", ext="csv"
+        "PLS_DA", validation_csv_file, suffix="probabilities", ext="csv"
     )
     validation_results.to_csv(output_path, index=False)
 

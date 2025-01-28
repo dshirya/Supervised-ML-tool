@@ -2,16 +2,39 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import classification_report
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
-from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
+import numpy as np
 
 from core import folder
 
+# Define the class-to-integer mapping
+class_mapping = {
+    "Cu3Au": 1,
+    "Cr3Si": 2,
+    "PuNi3": 3,
+    "Fe3C": 4,
+    "Mg3Cd": 5,
+    "TiAl3": 6,
+}
+
+def encode_classes(y, class_mapping):
+    """Encodes the class labels using the provided mapping."""
+    if all(isinstance(label, (int, np.integer)) for label in y):
+        # If y is already numerical, assume it's encoded and return it directly
+        return y
+    return [class_mapping[label] for label in y]
+
+def decode_classes(y_encoded, class_mapping):
+    """Decodes the integer class labels back to their string representation."""
+    reverse_mapping = {v: k for k, v in class_mapping.items()}
+    return [reverse_mapping[label] for label in y_encoded]
 
 def run_XGBoost(X_df, y):
-    # Initialize the Label Encoder and encode the labels
-    encoder = LabelEncoder()
-    y_encoded = encoder.fit_transform(y)  # Do not shift labels here
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
+    
+    # Adjust labels to start from 0 for XGBoost compatibility
+    y_encoded_zero_based = np.array(y_encoded) - 1
 
     # Initialize Stratified K-Fold cross-validator
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=19)
@@ -20,18 +43,21 @@ def run_XGBoost(X_df, y):
     model = XGBClassifier(eval_metric="mlogloss")
 
     # Cross-validate and get predictions for each fold
-    y_pred = cross_val_predict(model, X_df, y_encoded, cv=skf)
+    y_pred_zero_based = cross_val_predict(model, X_df, y_encoded_zero_based, cv=skf)
 
-    # Decode predicted labels back to original (shifted for reporting purposes)
-    y_pred_decoded = encoder.inverse_transform(y_pred)
+    # Shift predictions back to 1-based indexing
+    y_pred = y_pred_zero_based + 1
 
     # Evaluate the model
     class_report = classification_report(
-        y, y_pred_decoded, digits=3, output_dict=True, labels=encoder.classes_
+        y_encoded, y_pred, digits=3, output_dict=True
     )
     return class_report
 
-def plot_XGBoost_feature_importance(X_df, y_encoded, csv_file_path):
+def plot_XGBoost_feature_importance(X_df, y, csv_file_path):
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
+
     model = XGBClassifier(eval_metric="mlogloss")
     # Fit the model to the entire dataset to retrieve feature importances
     model.fit(X_df, y_encoded)
@@ -75,38 +101,26 @@ def plot_XGBoost_feature_importance(X_df, y_encoded, csv_file_path):
     plt.close()
 
 def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file):
-    """
-    Validates the XGBoost model on a validation dataset and includes predicted probabilities for each class.
+    # Encode class labels using the predefined mapping
+    y_train_encoded = encode_classes(y_train, class_mapping)
 
-    Parameters:
-        X_train: Training feature matrix.
-        y_train: Training target labels.
-        X_val: Validation feature matrix.
-        csv_file_path: Path of the training data (for output organization).
-        validation_csv_file: Path of the validation data.
-
-    Returns:
-        y_pred_validation: Predicted classes for the validation set.
-        probabilities: Predicted probabilities for each class.
-    """
-    # Initialize the Label Encoder and encode the training labels
-    encoder = LabelEncoder()
-    y_train_encoded = encoder.fit_transform(y_train)  # Keep labels starting from 0 for XGBoost
+    # Adjust labels to start from 0 for XGBoost compatibility
+    y_train_zero_based = np.array(y_train_encoded) - 1
 
     # Initialize the XGBoost Classifier
     model = XGBClassifier(eval_metric="mlogloss", random_state=19)
 
     # Fit the model to the training data
-    model.fit(X_train, y_train_encoded)
+    model.fit(X_train, y_train_zero_based)
 
     # Predict probabilities for the validation set
     probabilities = model.predict_proba(X_val)
 
     # Predicted class labels (0-based)
-    y_pred_encoded = probabilities.argmax(axis=1)
+    y_pred_zero_based = probabilities.argmax(axis=1)
 
-    # Shift the predicted class labels to start from 1
-    y_pred_validation = y_pred_encoded + 1
+    # Shift predictions back to 1-based indexing
+    y_pred_validation = y_pred_zero_based + 1
 
     # Dynamically determine the number of classes from probabilities
     n_classes = probabilities.shape[1]

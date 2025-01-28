@@ -5,8 +5,29 @@ from sklearn.svm import SVC
 
 from core import folder
 
+# Define the class-to-integer mapping
+class_mapping = {
+    "Cu3Au": 1,
+    "Cr3Si": 2,
+    "PuNi3": 3,
+    "Fe3C": 4,
+    "Mg3Cd": 5,
+    "TiAl3": 6,
+}
+
+def encode_classes(y, class_mapping):
+    """Encodes the class labels using the provided mapping."""
+    return [class_mapping[label] for label in y]
+
+def decode_classes(y_encoded, class_mapping):
+    """Decodes the integer class labels back to their string representation."""
+    reverse_mapping = {v: k for k, v in class_mapping.items()}
+    return [reverse_mapping[label] for label in y_encoded]
 
 def get_report(X, y):
+    # Encode class labels using the predefined mapping
+    y_encoded = encode_classes(y, class_mapping)
+
     # Define the model
     model = SVC(kernel="rbf")
 
@@ -14,10 +35,10 @@ def get_report(X, y):
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=41)
 
     # Use cross_val_predict to get predictions for each fold
-    y_pred = cross_val_predict(model, X, y, cv=skf)
+    y_pred = cross_val_predict(model, X, y_encoded, cv=skf)
 
     # Evaluating the model, get results as a dictionary
-    report_dict = classification_report(y, y_pred, digits=3, output_dict=True)
+    report_dict = classification_report(y_encoded, y_pred, digits=3, output_dict=True)
     return report_dict
 
 def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, validation_csv_file):
@@ -35,20 +56,20 @@ def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, vali
         probabilities: Probabilities for each class on the validation set.
         y_pred: Predicted classes on the validation set.
     """
+    # Encode class labels using the predefined mapping
+    y_train_encoded = encode_classes(y_train, class_mapping)
+
     # Define the SVC model with probability=True
     model = SVC(kernel="rbf", probability=True, random_state=41)
 
     # Fit the model on the training data
-    model.fit(X_train, y_train)
+    model.fit(X_train, y_train_encoded)
 
     # Predict probabilities for the validation set
     probabilities = model.predict_proba(X_val)
 
     # Predicted class labels (0-based)
-    y_pred = probabilities.argmax(axis=1)
-
-    # Shift the predicted class labels to start from 1
-    y_pred = y_pred + 1
+    y_pred = probabilities.argmax(axis=1) + 1  # Classes start from 1
 
     # Dynamically determine the number of classes from probabilities
     n_classes = probabilities.shape[1]
