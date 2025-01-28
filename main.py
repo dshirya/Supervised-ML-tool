@@ -20,7 +20,7 @@ prompt.print_label_mapping(encoder)
 
 script_path = os.path.abspath(__file__)
 script_dir_path = os.path.dirname(script_path)
-output_dir_path = os.path.join(script_dir_path, "features")
+output_dir_path = os.path.join(script_dir_path, "outputs")
 
 # Find all .csv files in folders
 csv_file_paths = folder.find_csv_files(output_dir_path)
@@ -36,7 +36,6 @@ for i, csv_file_path in enumerate(csv_file_paths, start=1):
     X_val_df, X_val = preprocess.preprocess_validation_data(
         validation_csv_file, scaler_standard, scaler_minmax
     )
-
 
     print("(1/4) Running SVM model...")
     feature_file_name = folder.get_file_name(csv_file_path)

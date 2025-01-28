@@ -11,17 +11,12 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import LabelEncoder
 
+
 from core import folder
 
+
 # Define the class-to-integer mapping
-class_mapping = {
-    "Cu3Au": 1,
-    "Cr3Si": 2,
-    "PuNi3": 3,
-    "Fe3C": 4,
-    "Mg3Cd": 5,
-    "TiAl3": 6,
-}
+class_mapping = {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5} #based on Silhouettes scores
 
 def encode_classes(y, class_mapping):
     """Encodes the class labels using the provided mapping."""
@@ -179,8 +174,12 @@ def validate_PLS_DA_model(pls, X, y, X_val, csv_file_path, validation_csv_file):
     # Save results in a DataFrame
     column_names = [f"Class_{i}" for i in range(1, len(class_mapping) + 1)]
     validation_results = pd.DataFrame(probabilities, columns=column_names)
-    validation_results.insert(0, "Sample", np.arange(1, len(X_val) + 1))
     validation_results["Predicted Class"] = y_pred_validation_encoded
+    validation_results.insert(0, "Sample", np.arange(1, len(X_val) + 1))
+
+    # Reorder columns to place "Predicted Class" as the second column
+    columns_order = ["Sample", "Predicted Class"] + column_names
+    validation_results = validation_results[columns_order]
 
     # Save results to a CSV file
     output_path = folder.create_folder_get_output_path(

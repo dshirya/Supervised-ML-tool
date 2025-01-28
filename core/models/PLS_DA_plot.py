@@ -5,14 +5,7 @@ from sklearn.cross_decomposition import PLSRegression
 from core import folder
 
 # Define the class-to-integer mapping
-class_mapping = {
-    "Cu3Au": 1,
-    "Cr3Si": 2,
-    "PuNi3": 3,
-    "Fe3C": 4,
-    "Mg3Cd": 5,
-    "TiAl3": 6,
-}
+class_mapping = {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5} #based on Silhouettes scores
 
 def encode_classes(y, class_mapping):
     """Encodes the class labels using the provided mapping."""
@@ -31,7 +24,7 @@ def format_formula_to_latex(formula):
             formatted += char
     return formatted
 
-def plot_two_component(X, y, feature_file_path):
+def plot_two_component(X, y, output_file_path):
     # Encode class labels using the predefined mapping
     y_encoded = encode_classes(y, class_mapping)
 
@@ -52,7 +45,7 @@ def plot_two_component(X, y, feature_file_path):
 
     plot_path = folder.create_folder_get_output_path(
         "PLS_DA_plot",
-        feature_file_path,
+        output_file_path,
         "n=2",
         ext = "png",
     )
