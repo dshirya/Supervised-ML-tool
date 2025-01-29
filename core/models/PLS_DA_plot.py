@@ -84,7 +84,7 @@ def plot_two_component(X, y, output_file_path):
         plt.close()
         # plt.show()
 
-def plot_two_component_with_validation(X, y, X_val, feature_file_path):
+def plot_two_component_with_validation(X, y, X_val, validation_csv_file):
     # Encode class labels using the predefined mapping
     y_encoded = encode_classes(y, class_mapping)
 
@@ -100,7 +100,7 @@ def plot_two_component_with_validation(X, y, X_val, feature_file_path):
     ]
 
     plot_path = folder.create_folder_get_output_path(
-        "PLS_DA_plot", feature_file_path, suffix="validation", ext="png"
+        "PLS_DA_plot", validation_csv_file, suffix="validation", ext="png", validation=True
     )
 
     # Scatter plot

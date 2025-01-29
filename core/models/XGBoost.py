@@ -141,8 +141,9 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
     output_path = folder.create_folder_get_output_path(
         "XGBoost",
         validation_csv_file,
-        suffix="validation_predictions_with_probabilities",
+        suffix="validation_with_probabilities",
         ext="csv",
+        validation=True
     )
     validation_results.to_csv(output_path, index=False)
 

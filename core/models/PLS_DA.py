@@ -28,6 +28,7 @@ def decode_classes(y_encoded, class_mapping):
     return np.array([reverse_mapping[label] for label in y_encoded])
 
 def find_best_n_dim(X, y, csv_file_path, MAX_N_COMPONENTS=10):
+
     best_accuracy = 0
     best_n_components = 2
 
@@ -183,7 +184,7 @@ def validate_PLS_DA_model(pls, X, y, X_val, csv_file_path, validation_csv_file):
 
     # Save results to a CSV file
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA", validation_csv_file, suffix="probabilities", ext="csv"
+        "PLS_DA", validation_csv_file, suffix="validation_with_probabilities", ext="csv", validation=True
     )
     validation_results.to_csv(output_path, index=False)
 

@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.preprocessing import LabelEncoder
 
-from core import folder, preprocess, prompt, report
+from core import folder, preprocess, report
 from core.models import PLS_DA, SVM, PLS_DA_plot, XGBoost
 
 # Use the SAF's features as the "y" vector
@@ -16,11 +16,10 @@ validation_csv_file = "data/validation.csv"
 # Initialize and fit the LabelEncoder
 encoder = LabelEncoder()
 y_encoded = encoder.fit_transform(y)
-prompt.print_label_mapping(encoder)
 
 script_path = os.path.abspath(__file__)
 script_dir_path = os.path.dirname(script_path)
-output_dir_path = os.path.join(script_dir_path, "outputs")
+output_dir_path = os.path.join(script_dir_path, "features")
 
 # Find all .csv files in folders
 csv_file_paths = folder.find_csv_files(output_dir_path)

@@ -90,8 +90,9 @@ def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, vali
     output_path = folder.create_folder_get_output_path(
         "SVM",
         validation_csv_file,
-        suffix="validation_predictions_with_probabilities",
+        suffix="validation_with_probabilities",
         ext="csv",
+        validation=True
     )
     validation_results.to_csv(output_path, index=False)
 
