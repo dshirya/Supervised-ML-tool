@@ -57,6 +57,22 @@ Best Mapping: {'Cu3Au': 3, 'Cr3Si': 5, 'PuNi3': 6, 'Fe3C': 1, 'Mg3Cd': 4, 'TiAl3
 Best Mapping: {'Cu3Au': 3, 'Cr3Si': 5, 'PuNi3': 6, 'Fe3C': 1, 'Mg3Cd': 4, 'TiAl3': 2} with Accuracy: 0.993
 ```
 3. **Fisher’s Discriminant Ratio (FDR) Optimization**
+```python
+def fisher_discriminant_ratio(X_pls, y_encoded):
+    """Calculate Fisher's Discriminant Ratio (FDR)."""
+    classes = np.unique(y_encoded)
+    overall_mean = np.mean(X_pls, axis=0)
+    between_class_variance = 0
+    within_class_variance = 0
+
+    for cls in classes:
+        class_data = X_pls[y_encoded == cls]
+        class_mean = np.mean(class_data, axis=0)
+        between_class_variance += len(class_data) * np.sum((class_mean - overall_mean)**2)
+        within_class_variance += np.sum((class_data - class_mean)**2)
+
+    return between_class_variance / within_class_variance
+```
    - Labelings were evaluated using Fisher’s Discriminant Ratio, which measures the separation between class distributions relative to their within-class variance.
    - Higher FDR values indicate better class separation, making it a useful metric for optimizing label assignments.
    - However, in some cases, maximizing FDR did not consistently lead to visually well-separated clusters.
@@ -64,6 +80,11 @@ Best Mapping: {'Cu3Au': 3, 'Cr3Si': 5, 'PuNi3': 6, 'Fe3C': 1, 'Mg3Cd': 4, 'TiAl3
 Best Mapping: {'Cu3Au': 2, 'Cr3Si': 3, 'PuNi3': 6, 'Fe3C': 4, 'Mg3Cd': 1, 'TiAl3': 5} with FDR Value: 17.044
 ```
 4. **Silhouette Score Maximization**
+```python
+# Compute silhouette score
+silhouette = silhouette_score(X_pls, y_encoded)
+print(f"Silhouette Score: {silhouette}")
+```
 	  -	Silhouette analysis was applied to measure the cohesion and separation of clusters in the PLS-DA latent space.
    -	The silhouette score quantifies how well a sample is clustered within its assigned class while distinguishing it from other classes.
    -	The labeling with the highest silhouette score exhibited the most well-defined clusters, indicating strong inter-class separation and intra-class cohesion.
@@ -71,6 +92,19 @@ Best Mapping: {'Cu3Au': 2, 'Cr3Si': 3, 'PuNi3': 6, 'Fe3C': 4, 'Mg3Cd': 1, 'TiAl3
 Best Mapping: {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5} with Silhouette Value: 0.640
 ```
 5. **Pairwise Distance Analysis**
+```python
+def pairwise_class_distances(X_pls, y_encoded):
+    classes = np.unique(y_encoded)
+    centroids = {cls: np.mean(X_pls[y_encoded == cls], axis=0) for cls in classes}
+    
+    distances = []
+    for i, cls1 in enumerate(classes):
+        for cls2 in classes[i+1:]:
+            dist = euclidean(centroids[cls1], centroids[cls2])
+            distances.append((cls1, cls2, dist))
+    
+    return distances
+```
    - Pairwise distances between class centroids in the PLS-DA space were computed to assess the degree of separation among different class label assignments.
    - This approach identified labelings that maximized inter-class distances while maintaining intra-class compactness.
    - The results of this approach have the largest LV values.
