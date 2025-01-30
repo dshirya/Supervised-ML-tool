@@ -1,6 +1,14 @@
-### This is a copy of the repo made by @bobleesj
-### Original repo: https://github.com/bobleesj/SAF-CAF-performance
+# Supervised-ML-tool 
 
+This project utilizes multiple machine learning models for classification tasks related to material structures. The models include **PLS-DA** (Partial Least Squares Discriminant Analysis),  **SVM** (Support Vector Machine), and **XGBoost**. Each model is trained on labeled datasets and validated using a separate validation datase
+
+This project is a modification of the [CAF-SAF-performance](https://github.com/bobleesj/SAF-CAF-performance) repository, which was developed to evaluate the classification performance of crystal structures using **SAF** (Structure Analyzer/Featurizer) and **CAF** (Composition Structure Analyzer/Featurizer).
+
+The methods implemented in this project are based on the work presented in the following publication:
+
+📄 [Composition and structure analyzer/featurizer for explainable machine-learning models to predict solid state structures](https://pubs.rsc.org/en/content/articlehtml/2024/dd/d4dd00332b)
+
+If you use this repository or its modifications in your research, please consider citing the original work.
 
 ## Machine Learning Models
 ### SVM
@@ -135,4 +143,7 @@ Check the `outputs` folder for ML reports, plots, etc.
 
 ## Questions?
 
-For help with generating structural data using SAF, contact Bob at [sl5400@columbia.edu](mailto:sl5400@columbia.edu).
+For help with generating structural data using SAF and CAF, contact Bob at [sl5400@columbia.edu](mailto:sl5400@columbia.edu).
+
+For help with using that code, contact Danila at myhunter [danila.shiryaev44@myhunter.cuny.edu](mailto:danila.shiryaev44@myhunter.cuny.edu).
+
