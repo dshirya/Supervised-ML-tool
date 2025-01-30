@@ -23,11 +23,12 @@ SVM is used for classification with an RBF kernel and probability estimates enab
 {"Cu3Au": 1, "Cr3Si": 2, "PuNi3": 3, "Fe3C": 4, "Mg3Cd": 5, "TiAl3": 6}
 ```
 *	**Model Evaluation and Outputs**:
-  *	Uses 10-Fold Stratified Cross-Validation to ensure balanced splits across all classes.
-  *	Generates a classification report with precision, recall, and F1-score.
-  *	Predictions for the validation dataset include probability estimates for each class.
+  	* Uses 10-Fold Stratified Cross-Validation to ensure balanced splits across all classes.
+   	* Generates a classification report with precision, recall, and F1-score.
+    * Predictions for the validation dataset include probability estimates for each class.
 * **Output Files**:
   * SVM_validation_with_probabilities.csv: Stores validation predictions and probability scores.
+  * SVM_report.csv: Classification report with precision, recall, and F1-score.
 ## PLS-DA
 PLS-DA is used for supervised classification by projecting predictor variables (X) and response variables (y) into a lower-dimensional space. The number of components (*n_components*) is dynamically selected using cross-validation.
 * **Hyperparameters**:
@@ -97,7 +98,10 @@ Among the evaluated methods, the labeling based on **Silhouette score** maximiza
 * **Output Files**:
   * PLS_DA_n_analysis.csv: Accuracy for different n_components.
   *	PLS_DA_feature_importance.csv: Feature importance scores.
-  *	PLS_DA_validation_with_probabilities: Probability scores for each class. Validation data is transformed and predictions are saved with one-vs-rest probabilities.
+  *	PLS_DA_validation_with_probabilities.csv: Probability scores for each class. Validation data is transformed and predictions are saved with one-vs-rest probabilities.
+  *	PLS_DA_report.csv: Classification report with precision, recall, and F1-score.
+  *	PLS_DA_plot_n=2.png: Classification scatterplot
+  *	PLS_DA_plot_validation.png: Classification scatterplot with validation data
 
 ## XGBooost
 XGBoost is used for classification with optimized hyperparameters.
@@ -120,6 +124,7 @@ y_encoded_zero_based = np.array(y_encoded) - 1
 * **Output Files**:
   * XGBoost_gain_score.png: Feature importance plot.
   * XGBoost_validation_with_probabilities.csv: Validation results with probability scores.
+  * XGBoost_report.csv: Classification report with precision, recall, and F1-score.
   
 ## Directory structure
 ```bash
