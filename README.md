@@ -10,63 +10,119 @@ The methods implemented in this project are based on the work presented in the f
 
 If you use this repository or its modifications in your research, please consider citing the original work.
 
-## Machine Learning Models
-### SVM
+# Machine Learning Models
+## SVM
 SVM is used for classification with an RBF kernel and probability estimates enabled.
-* Hyperparameters:
+* **Hyperparameters**:
   * kernel="rbf": Uses a Radial Basis Function (RBF) kernel for non-linear classification.
   * probability=True: Enables probability estimates using Platt scaling.
   * random_state=41: Ensures reproducibility.
-* Class Label Encoding:
+* **Class Label Encoding**:
   * Uses predefined class mapping:
-```
+```bash
 {"Cu3Au": 1, "Cr3Si": 2, "PuNi3": 3, "Fe3C": 4, "Mg3Cd": 5, "TiAl3": 6}
 ```
-*	Model Evaluation and Outputs:
+*	**Model Evaluation and Outputs**:
   *	Uses 10-Fold Stratified Cross-Validation to ensure balanced splits across all classes.
   *	Generates a classification report with precision, recall, and F1-score.
   *	Predictions for the validation dataset include probability estimates for each class.
-* Output Files:
+* **Output Files**:
   * SVM_validation_with_probabilities.csv: Stores validation predictions and probability scores.
-### PLS-DA
-PLS-DA is used for supervised classification by projecting predictor variables (X) and response variables (y) into a lower-dimensional space. The number of components (n_components) is dynamically selected using cross-validation.
-* Hyperparameters:
+## PLS-DA
+PLS-DA is used for supervised classification by projecting predictor variables (X) and response variables (y) into a lower-dimensional space. The number of components (*n_components*) is dynamically selected using cross-validation.
+* **Hyperparameters**:
   * n_components: Automatically determined between 2 and 10 via Stratified 10-Fold Cross-Validation.
   * scale=False: Disables internal scaling to retain the original distribution of input features.
-* Class Label Encoding:
-  * Class labels are assigned numerical values based on silhouette scores:
+* **Class Label Encoding**:
+  
+The selection of an appropriate labeling scheme for the Partial Least Squares Discriminant Analysis (PLS-DA) model is a critical step in ensuring accurate classification and optimal separation between classes in the latent space. Since PLS-DA treats class labels as numerical values, the choice of numerical encoding directly influences model performance and class distribution in the reduced-dimensional space. To determine the most effective labeling, multiple approaches were evaluated based on classification metrics and clustering quality measures.
+
+**Methods for Labeling Selection**
+
+Several strategies were applied to assess the impact of different label assignments:
+
+1. **F1-Score Optimization**
+   - Multiple label permutations were tested to identify the assignment yielding the highest macro F1-score.
+   - The F1-score accounts for both precision and recall, making it particularly relevant for imbalanced datasets.
+   - However, in certain cases, the highest F1-score corresponded to labelings that produced nearly linear scatterplots, suggesting poor class separation in the latent space.
+```bash
+Best Mapping: {'Cu3Au': 3, 'Cr3Si': 5, 'PuNi3': 6, 'Fe3C': 1, 'Mg3Cd': 4, 'TiAl3': 2}, Macro F1-Score: 0.991
 ```
+2. **Accuracy-Based Labeling**
+   - Labelings were evaluated based on their overall classification accuracy.
+   - While accuracy provides a straightforward measure of model performance, it does not necessarily reflect the quality of class separation in the PLS-DA projection.
+   - The result of that type of labeling was the same as for F1-score, with nearly linear scatterplots.
+```bash
+Best Mapping: {'Cu3Au': 3, 'Cr3Si': 5, 'PuNi3': 6, 'Fe3C': 1, 'Mg3Cd': 4, 'TiAl3': 2} with Accuracy: 0.993
+```
+3. **Fisher’s Discriminant Ratio (FDR) Optimization**
+   - Labelings were evaluated using Fisher’s Discriminant Ratio, which measures the separation between class distributions relative to their within-class variance.
+   - Higher FDR values indicate better class separation, making it a useful metric for optimizing label assignments.
+   - However, in some cases, maximizing FDR did not consistently lead to visually well-separated clusters.
+```bash
+Best Mapping: {'Cu3Au': 2, 'Cr3Si': 3, 'PuNi3': 6, 'Fe3C': 4, 'Mg3Cd': 1, 'TiAl3': 5} with FDR Value: 17.044
+```
+4. **Silhouette Score Maximization**
+	  -	Silhouette analysis was applied to measure the cohesion and separation of clusters in the PLS-DA latent space.
+   -	The silhouette score quantifies how well a sample is clustered within its assigned class while distinguishing it from other classes.
+   -	The labeling with the highest silhouette score exhibited the most well-defined clusters, indicating strong inter-class separation and intra-class cohesion.
+```bash
+Best Mapping: {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5} with Silhouette Value: 0.640
+```
+5. **Pairwise Distance Analysis**
+   - Pairwise distances between class centroids in the PLS-DA space were computed to assess the degree of separation among different class label assignments.
+   - This approach identified labelings that maximized inter-class distances while maintaining intra-class compactness.
+   - The results of this approach have the largest LV values.
+```bash
+Best Mapping: {'Cu3Au': 1, 'Cr3Si': 2, 'PuNi3': 6, 'Fe3C': 5, 'Mg3Cd': 3, 'TiAl3': 4} with Pairwise Value: 1.995
+```
+
+ <div align="center">
+  
+   ### Comparison of Labeling Strategies for PLS-DA: Impact on Class Separation
+<img src="https://github.com/user-attachments/assets/e4b9dff4-dd12-4218-8e2d-d17720f99804" alt="labeling" width="800">
+</div>
+
+**Selection of the Optimal Labeling**
+
+Among the evaluated methods, the labeling based on **Silhouette score** maximization was selected as the most effective due to its ability to:
+- Produce distinct and well-separated clusters in the PLS-DA scatterplots.
+- Provide a quantitative criterion for selecting an optimal numerical encoding.
+- Balance classification performance with improved interpretability in the latent space.
+
+```bash
+#Labeling used in the analysis
 {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5}
 ``` 
-* Output Files:
+* **Output Files**:
   * PLS_DA_n_analysis.csv: Accuracy for different n_components.
   *	PLS_DA_feature_importance.csv: Feature importance scores.
   *	PLS_DA_validation_with_probabilities: Probability scores for each class. Validation data is transformed and predictions are saved with one-vs-rest probabilities.
 
-### XGBooost
+## XGBooost
 XGBoost is used for classification with optimized hyperparameters.
-* Hyperparameters:
+* **Hyperparameters**:
   * eval_metric="mlogloss": Uses Multiclass Logarithmic Loss for evaluation.
   * random_state=19: Ensures consistent training results.
-* Class Label Encoding:
+* **Class Label Encoding**:
   * XGBoost requires labels to start from 0, so class mapping is adjusted:
-```
+```bash
 y_encoded_zero_based = np.array(y_encoded) - 1
 ```
-```
+```bash
 {"Cu3Au": 1, "Cr3Si": 2, "PuNi3": 3, "Fe3C": 4, "Mg3Cd": 5, "TiAl3": 6}
 ```
-* Model Evaluation and Outputs:
+* **Model Evaluation and Outputs**:
   * Performs 10-Fold Stratified Cross-Validation for performance assessment.
   * Extracts feature importance scores using the gain metric.
   * Saves top 10 most important features based on their contribution to predictions.
   * Validation results include predicted classes and probability scores.
-* Output Files:
+* **Output Files**:
   * XGBoost_gain_score.png: Feature importance plot.
   * XGBoost_validation_with_probabilities.csv: Validation results with probability scores.
- 
-### Directory structure
-```
+  
+## Directory structure
+```bash
 ├── main.py
 ├── core/
 │   ├── folder.py       # Handles output file management
@@ -87,6 +143,9 @@ y_encoded_zero_based = np.array(y_encoded) - 1
 │   ├── PLS_DA/
 │   │   ├── training/
 │   │   ├── validation/
+│   ├── PLS_DA_plot/
+│   │   ├── training/
+│   │   ├── validation/
 │   ├── SVM/
 │   │   ├── training/
 │   │   ├── validation/
@@ -97,7 +156,7 @@ y_encoded_zero_based = np.array(y_encoded) - 1
 * Training outputs are stored in outputs/{model_name}/training/.
 * Validation results are saved separately in outputs/{model_name}/validation/.
 
-## How to reproduce
+# How to reproduce
 
 ```bash
 # Download the repository
