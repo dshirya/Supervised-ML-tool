@@ -54,7 +54,10 @@ def find_best_n_dim(X, y, csv_file_path, MAX_N_COMPONENTS=10):
 
     # Save the DataFrame to a CSV file
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA", csv_file_path, suffix="n_analysis", ext="csv"
+        "PLS_DA", 
+        csv_file_path, 
+        suffix="n_analysis", 
+        ext="csv"
     )
     pd.DataFrame(results).to_csv(output_path, index=False)
     return best_n_components
@@ -90,7 +93,10 @@ def save_feature_importance(
 
     # Generate output path and save the dataframe to CSV
     output_path = folder.create_folder_get_output_path(
-        "PLS_DA", csv_file_path, suffix="feature_importance", ext="csv"
+        "PLS_DA", 
+        csv_file_path, 
+        suffix="feature_importance", 
+        ext="csv"
     )
     df.to_csv(output_path)
 
@@ -110,7 +116,7 @@ def save_correlation_matrix(X, X_columns, csv_file_path):
 def generate_classification_report(X_scaled, y, pls):
     # Import necessary modules
     encoder = LabelEncoder()
-    y_encoded = encoder.fit_transform(y) + 1
+    y_encoded = encoder.fit_transform(y)
 
     # Set up 10-fold cross-validation
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=19)
