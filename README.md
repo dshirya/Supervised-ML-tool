@@ -14,9 +14,9 @@ If you use this repository or its modifications in your research, please conside
 ## SVM
 SVM is used for classification with an RBF kernel and probability estimates enabled.
 * **Hyperparameters**:
-  * kernel="rbf": Uses a Radial Basis Function (RBF) kernel for non-linear classification.
-  * probability=True: Enables probability estimates using Platt scaling.
-  * random_state=41: Ensures reproducibility.
+  * `kernel="rbf"`: Uses a Radial Basis Function (RBF) kernel for non-linear classification.
+  * `probability=True`: Enables probability estimates using Platt scaling.
+  * `random_state=41`: Ensures reproducibility.
 * **Class Label Encoding**:
   * Uses predefined class mapping:
 ```bash
@@ -32,8 +32,8 @@ SVM is used for classification with an RBF kernel and probability estimates enab
 ## PLS-DA
 PLS-DA is used for supervised classification by projecting predictor variables (X) and response variables (y) into a lower-dimensional space. The number of components (*n_components*) is dynamically selected using cross-validation.
 * **Hyperparameters**:
-  * n_components: Automatically determined between 2 and 10 via Stratified 10-Fold Cross-Validation.
-  * scale=False: Disables internal scaling to retain the original distribution of input features.
+  * `n_components`: Automatically determined between 2 and 10 via Stratified 10-Fold Cross-Validation.
+  * `scale=False`: Disables internal scaling to retain the original distribution of input features.
 * **Class Label Encoding**:
   
 The selection of an appropriate labeling scheme for the Partial Least Squares Discriminant Analysis (PLS-DA) model is a critical step in ensuring accurate classification and optimal separation between classes in the latent space. Since PLS-DA treats class labels as numerical values, the choice of numerical encoding directly influences model performance and class distribution in the reduced-dimensional space. To determine the most effective labeling, multiple approaches were evaluated based on classification metrics and clustering quality measures.
