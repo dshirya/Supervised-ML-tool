@@ -70,9 +70,9 @@ def save_feature_importance(
     X_pls, _ = pls.fit_transform(X, y_encoded)
 
     # Calculate the variance explained by each component for X
-    total_variance_X = np.var(X, axis=0).sum()
+    total_variance_X_pls = np.var(X_pls, axis=0).sum()
     explained_variance_X = [
-        np.var(X_pls[:, i]) / total_variance_X for i in range(best_n_components)
+        np.var(X_pls[:, i]) / total_variance_X_pls for i in range(best_n_components)
     ]
 
     # Create column names with explained variance

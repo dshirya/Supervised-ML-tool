@@ -135,7 +135,7 @@ def validate_XGBoost(X_train, y_train, X_val, csv_file_path, validation_csv_file
 
     # Add probability columns for each class (shift class indices to start from 1)
     for i in range(n_classes):
-        validation_results[f"Class_{i + 1}_Probability"] = probabilities[:, i]
+        validation_results[f"Class_{i + 1}"] = probabilities[:, i]
 
     # Save predictions and probabilities to a CSV file
     output_path = folder.create_folder_get_output_path(

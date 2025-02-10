@@ -84,7 +84,7 @@ def validate_svc_with_probabilities(X_train, y_train, X_val, csv_file_path, vali
 
     # Add probability columns for each class (shift column names to start from 1)
     for i in range(n_classes):
-        validation_results[f"Class_{i + 1}_Probability"] = probabilities[:, i]
+        validation_results[f"Class_{i + 1}"] = probabilities[:, i]
 
     # Save predictions and probabilities to a CSV file
     output_path = folder.create_folder_get_output_path(

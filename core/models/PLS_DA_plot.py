@@ -5,7 +5,7 @@ from sklearn.cross_decomposition import PLSRegression
 from core import folder
 
 # Define the class-to-integer mapping
-class_mapping = {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5} #based on Silhouettes scores
+class_mapping = {'Cu3Au': 2, 'Cr3Si': 4, 'PuNi3': 6, 'Fe3C': 3, 'Mg3Cd': 1, 'TiAl3': 5}  #based on Silhouettes scores
 
 def encode_classes(y, class_mapping):
     """Encodes the class labels using the provided mapping."""
@@ -139,12 +139,12 @@ def plot_two_component_with_validation(X, y, X_val, validation_csv_file):
             edgecolors="black",
             marker="*",
             linewidths=1,
-            label="Validation Data",
+            label="Test Data",
         )
 
         plt.xlabel(f"LV 1 ({(explained_variance_X[0] * 100):.2f} %)")
         plt.ylabel(f"LV 2 ({(explained_variance_X[1] * 100):.2f} %)")
         plt.legend(loc="lower left", fontsize=8, title_fontsize=9)
-        plt.title(f"PLS-DA Scatterplot: Training and Validation Data")  # noqa: F541
-        plt.savefig(plot_path, dpi=600)  # Save the plot as a PNG file
+        plt.title(f"PLS-DA Scatterplot: Training and Test Data")  # noqa: F541
+        plt.savefig(plot_path, dpi=2000)  # Save the plot as a PNG file
         plt.close()
