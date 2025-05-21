@@ -29,7 +29,7 @@ def plot_two_component(X, y, output_file_path):
     y_encoded = encode_classes(y, class_mapping)
 
     # Load the dataset into PLS
-    pls = PLSRegression(n_components=2, scale=False)
+    pls = PLSRegression(n_components=2)
     # fit_transform returns a tuple (X_scores, Y_scores)
     X_pls = pls.fit_transform(X, y_encoded)[0]
 

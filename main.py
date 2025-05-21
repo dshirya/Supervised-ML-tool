@@ -28,12 +28,12 @@ for i, csv_file_path in enumerate(csv_file_paths, start=1):
     start_time = time.perf_counter()
 
     # Load and preprocess the dataset
-    X_df, X, columns, scaler_standard, scaler_minmax = preprocess.prepare_standarlize_X_block_(csv_file_path)
+    X_df, X, columns = preprocess.prepare_standarlize_X_block_(csv_file_path)
     print(
         f"\nProcessing {csv_file_path} with {X.shape[1]} features ({i}/{len(csv_file_paths)})."
     )
     X_val_df, X_val = preprocess.preprocess_validation_data(
-        validation_csv_file, scaler_standard, scaler_minmax
+        validation_csv_file
     )
 
     print("(1/4) Running SVM model...")

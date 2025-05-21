@@ -38,7 +38,7 @@ def find_best_n_dim(X, y, csv_file_path, MAX_N_COMPONENTS=10):
     skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=19)
 
     for n in range(2, MAX_N_COMPONENTS + 1):
-        pls = PLSRegression(n_components=n, scale=False)
+        pls = PLSRegression(n_components=n)
         y_pred_continuous = cross_val_predict(pls, X, y, cv=skf)
         y_pred = np.round(y_pred_continuous).astype(int)
         y_pred = np.clip(y_pred, 0, 9)
