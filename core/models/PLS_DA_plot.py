@@ -13,7 +13,7 @@ def encode_classes(y, class_mapping):
 
 def format_formula_to_latex(formula):
     """
-    Convert a chemical formula string into LaTeX format with subscripts.
+    Convert a chemical formula string into LaTeX format with subscripts. d
     E.g., "H2O" -> "H$_2$O"
     """
     formatted = ""
@@ -146,5 +146,5 @@ def plot_two_component_with_validation(X, y, X_val, validation_csv_file):
         plt.ylabel(f"LV 2 ({(explained_variance_X[1] * 100):.2f} %)")
         plt.legend(loc="lower left", fontsize=8, title_fontsize=9)
         plt.title(f"PLS-DA Scatterplot: Training and Test Data")  # noqa: F541
-        plt.savefig(plot_path, dpi=2000)  # Save the plot as a PNG file
+        plt.savefig(plot_path, dpi=600)  # Save the plot as a PNG file
         plt.close()
